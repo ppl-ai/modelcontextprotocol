@@ -94,7 +94,7 @@ vim ~/Library/Application\ Support/Claude/claude_desktop_config.json
 Docker build:
 
 ```bash
-docker build -t mcp/perplexity-ask:latest -f perplexity-ask/Dockerfile .
+docker build -t mcp/perplexity-ask:latest -f Dockerfile .
 ```
 
 ### Step 5: Testing
