@@ -1,6 +1,13 @@
 # Ignore macOS system files
 .DS_Store
 
+# Build output
+dist/
+build/
+
+# Testing
+coverage/
+
 # Ignore Python compiled files
 __pycache__/
 *.py[cod]
@@ -18,6 +25,7 @@ venv/
 *.log
 *.out
 *.err
+npm-debug.log*
 
 # Ignore database and cache files
 *.sqlite3
@@ -49,4 +57,3 @@ Desktop.ini
 *.csv
 *.tsv
 *.jsonl
-:

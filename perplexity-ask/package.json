@@ -1,29 +1,52 @@
 {
-  "name": "@modelcontextprotocol/server-perplexity-ask",
-  "version": "0.1.0",
+  "name": "mcp-perplexity-ask",
+  "version": "0.2.0",
   "description": "MCP server for Perplexity API integration",
-  "license": "MIT",
-  "author": "Model Context Protocol (https://modelcontextprotocol.io)",
-  "homepage": "https://modelcontextprotocol.io",
-  "bugs": "https://github.com/modelcontextprotocol/servers/issues",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "mcp-server-perplexity-ask": "dist/index.js"
+    "mcp-perplexity-ask": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsc && shx chmod +x dist/*.js",
-    "prepare": "npm run build",
-    "watch": "tsc --watch"
+    "build": "tsc && chmod +x dist/index.js",
+    "start": "node dist/index.js",
+    "dev": "npx @modelcontextprotocol/inspector dist/index.js",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm run build && changeset publish"
   },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "perplexity",
+    "ai",
+    "llm",
+    "chat",
+    "completion",
+    "sonar",
+    "api"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/modelcontextprotocol/modelcontextprotocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/issues"
+  },
+  "homepage": "https://github.com/modelcontextprotocol/modelcontextprotocol#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.1"
+    "@modelcontextprotocol/sdk": "^1.4.1"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@types/node": "^22",
-    "shx": "^0.3.4",
-    "typescript": "^5.6.2"
+    "typescript": "^5.7.3"
   }
 }
