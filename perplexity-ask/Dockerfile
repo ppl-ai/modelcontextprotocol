@@ -1,8 +1,6 @@
 FROM node:22.12-alpine AS builder
 
-
-COPY . /app
-
+COPY perplexity-ask /app
 
 WORKDIR /app
 
