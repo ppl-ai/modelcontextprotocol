@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/ppl-ai-modelcontextprotocol-badge.png)](https://mseep.ai/app/ppl-ai-modelcontextprotocol)
+
 # Perplexity Ask MCP Server
 
 An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research.
