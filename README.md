@@ -153,6 +153,18 @@ You should then see the application being part of your available tools like this
 
 ![Cursor MCP](perplexity-ask/assets/perplexity-ask-mcp-cursor.png)
 
+## Resources 
+
+### Open MCP Marketplace API Support 
+![MCP Marketplace User Review Rating Badge](http://www.deepnlp.org/api/marketplace/svg?ppl-ai/modelcontextprotocol)|[Reviews](http://www.deepnlp.org/store/ai-agent/mcp-server/pub-ppl-ai/modelcontextprotocol)|[GitHub](https://github.com/AI-Agent-Hub/mcp-marketplace)|[Doc](http://www.deepnlp.org/doc/mcp_marketplace)|[MCP Marketplace](http://www.deepnlp.org/store/ai-agent/mcp-server)
+Allow AI Agent/LLM to find this MCP Server via common python/typescript API, search&explore relevant servers and tools
+
+```python
+    import mcp_marketplace as mcpm
+    result_q = mcpm.search(query="research", mode="list", page_id=0, count_per_page=100, config_name="deepnlp") # search server by category choose various endpoint
+    result_id = mcpm.search(id="ppl-ai/modelcontextprotocol", mode="list", page_id=0, count_per_page=100, config_name="deepnlp")      # search server by id choose various endpoint 
+    tools = mcpm.list_tools(id="ppl-ai/modelcontextprotocol", config_name="deepnlp_tool")
+```
 
 ## License
 
