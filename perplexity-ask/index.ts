@@ -40,6 +40,20 @@ const PERPLEXITY_ASK_TOOL: Tool = {
         },
         description: "Array of conversation messages",
       },
+      model: {
+        type: "string",
+        description:
+          "The model to use for the completion. Can be 'sonar' or 'sonar-pro'. Defaults to 'sonar-pro'.",
+        enum: ["sonar", "sonar-pro"],
+      },
+      search_domain_filter: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        description:
+          "A list of domains to limit search results to. Max 10. Add a - at the beginning of the domain string for denylisting.",
+      },
     },
     required: ["messages"],
   },
@@ -75,6 +89,14 @@ const PERPLEXITY_RESEARCH_TOOL: Tool = {
           required: ["role", "content"],
         },
         description: "Array of conversation messages",
+      },
+      search_domain_filter: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        description:
+          "A list of domains to limit search results to. Max 10. Add a - at the beginning of the domain string for denylisting.",
       },
     },
     required: ["messages"],
@@ -112,6 +134,20 @@ const PERPLEXITY_REASON_TOOL: Tool = {
         },
         description: "Array of conversation messages",
       },
+      model: {
+        type: "string",
+        description:
+          "The model to use for reasoning. Can be 'sonar-reasoning' or 'sonar-reasoning-pro'. Defaults to 'sonar-reasoning-pro'.",
+        enum: ["sonar-reasoning", "sonar-reasoning-pro"],
+      },
+      search_domain_filter: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        description:
+          "A list of domains to limit search results to. Max 10. Add a - at the beginning of the domain string for denylisting.",
+      },
     },
     required: ["messages"],
   },
@@ -135,17 +171,22 @@ if (!PERPLEXITY_API_KEY) {
  */
 async function performChatCompletion(
   messages: Array<{ role: string; content: string }>,
-  model: string = "sonar-pro"
+  model: string = "sonar-pro",
+  search_domain_filter?: string[]
 ): Promise<string> {
   // Construct the API endpoint URL and request body
   const url = new URL("https://api.perplexity.ai/chat/completions");
-  const body = {
+  const body: any = {
     model: model, // Model identifier passed as parameter
     messages: messages,
-    // Additional parameters can be added here if required (e.g., max_tokens, temperature, etc.)
-    // See the Sonar API documentation for more details: 
-    // https://docs.perplexity.ai/api-reference/chat-completions
   };
+
+  if (search_domain_filter && search_domain_filter.length > 0) {
+    if (search_domain_filter.length > 10) {
+      throw new Error("search_domain_filter cannot contain more than 10 domains.");
+    }
+    body.search_domain_filter = search_domain_filter;
+  }
 
   let response;
   try {
@@ -182,7 +223,7 @@ async function performChatCompletion(
     throw new Error(`Failed to parse JSON response from Perplexity API: ${jsonError}`);
   }
 
-  // Directly retrieve the main message content from the response 
+  // Directly retrieve the main message content from the response
   let messageContent = data.choices[0].message.content;
 
   // If citations are provided, append them to the message content
@@ -233,11 +274,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (name) {
       case "perplexity_ask": {
         if (!Array.isArray(args.messages)) {
-          throw new Error("Invalid arguments for perplexity_ask: 'messages' must be an array");
+          throw new Error(
+            "Invalid arguments for perplexity_ask: 'messages' must be an array"
+          );
         }
-        // Invoke the chat completion function with the provided messages
         const messages = args.messages;
-        const result = await performChatCompletion(messages, "sonar-pro");
+        const model = args.model ?? "sonar-pro";
+        const search_domain_filter = args.search_domain_filter as (string[] | undefined);
+        if (search_domain_filter && (!Array.isArray(search_domain_filter) || !search_domain_filter.every(item => typeof item === 'string'))) {
+          throw new Error('Invalid arguments for perplexity_ask: search_domain_filter must be an array of strings');
+        }
+        if (
+          typeof model !== "string" ||
+          !["sonar", "sonar-pro"].includes(model)
+        ) {
+          throw new Error(
+            "Invalid model for perplexity_ask. Must be 'sonar' or 'sonar-pro'."
+          );
+        }
+        const result = await performChatCompletion(
+          messages,
+          model,
+          search_domain_filter
+        );
         return {
           content: [{ type: "text", text: result }],
           isError: false,
@@ -245,11 +304,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
       case "perplexity_research": {
         if (!Array.isArray(args.messages)) {
-          throw new Error("Invalid arguments for perplexity_research: 'messages' must be an array");
+          throw new Error(
+            "Invalid arguments for perplexity_research: 'messages' must be an array"
+          );
         }
         // Invoke the chat completion function with the provided messages using the deep research model
         const messages = args.messages;
-        const result = await performChatCompletion(messages, "sonar-deep-research");
+        const search_domain_filter = args.search_domain_filter as (string[] | undefined);
+        if (search_domain_filter && (!Array.isArray(search_domain_filter) || !search_domain_filter.every(item => typeof item === 'string'))) {
+          throw new Error('Invalid arguments for perplexity_research: search_domain_filter must be an array of strings');
+        }
+        const result = await performChatCompletion(
+          messages,
+          "sonar-deep-research",
+          search_domain_filter
+        );
         return {
           content: [{ type: "text", text: result }],
           isError: false,
@@ -257,11 +326,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
       case "perplexity_reason": {
         if (!Array.isArray(args.messages)) {
-          throw new Error("Invalid arguments for perplexity_reason: 'messages' must be an array");
+          throw new Error(
+            "Invalid arguments for perplexity_reason: 'messages' must be an array"
+          );
         }
-        // Invoke the chat completion function with the provided messages using the reasoning model
         const messages = args.messages;
-        const result = await performChatCompletion(messages, "sonar-reasoning-pro");
+        const model = args.model ?? "sonar-reasoning-pro";
+        const search_domain_filter = args.search_domain_filter as (string[] | undefined);
+        if (search_domain_filter && (!Array.isArray(search_domain_filter) || !search_domain_filter.every(item => typeof item === 'string'))) {
+          throw new Error('Invalid arguments for perplexity_reason: search_domain_filter must be an array of strings');
+        }
+        if (
+          typeof model !== "string" ||
+          !["sonar-reasoning", "sonar-reasoning-pro"].includes(model)
+        ) {
+          throw new Error(
+            "Invalid model for perplexity_reason. Must be 'sonar-reasoning' or 'sonar-reasoning-pro'."
+          );
+        }
+        const result = await performChatCompletion(
+          messages,
+          model,
+          search_domain_filter
+        );
         return {
           content: [{ type: "text", text: result }],
           isError: false,
@@ -280,7 +367,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       content: [
         {
           type: "text",
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+          text: `Error: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
         },
       ],
       isError: true,
