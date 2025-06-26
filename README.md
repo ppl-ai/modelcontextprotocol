@@ -20,12 +20,27 @@ Please refer to the official [DeepWiki page](https://deepwiki.com/ppl-ai/modelco
 ## Tools
 
 - **perplexity_ask**
-  - Engage in a conversation with the Sonar API for live web searches.
+  - Engages in a conversation using the Sonar API. 
   - **Inputs:**
     - `messages` (array): An array of conversation messages.
       - Each message must include:
         - `role` (string): The role of the message (e.g., `system`, `user`, `assistant`).
         - `content` (string): The content of the message.
+    - `model` (string, optional): The model to use for the completion. Can be `sonar` or `sonar-pro`. Defaults to `sonar-pro`.
+    - `search_domain_filter` (array of strings, optional): A list of domains to limit search results to (max 10). To denylist a domain, prefix it with a `-`.
+
+- **perplexity_research**
+  - Performs deep research using the Perplexity API.
+  - **Inputs:**
+    - `messages` (array): An array of conversation messages.
+    - `search_domain_filter` (array of strings, optional): A list of domains to limit search results to (max 10). To denylist a domain, prefix it with a `-`.
+
+- **perplexity_reason**
+  - Performs reasoning tasks using the Perplexity API.
+  - **Inputs:**
+    - `messages` (array): An array of conversation messages.
+    - `model` (string, optional): The model to use for reasoning. Can be `sonar-reasoning` or `sonar-reasoning-pro`. Defaults to `sonar-reasoning-pro`.
+    - `search_domain_filter` (array of strings, optional): A list of domains to limit search results to (max 10). To denylist a domain, prefix it with a `-`.
 
 ## Configuration
 
@@ -49,7 +64,21 @@ cd modelcontextprotocol/perplexity-ask && npm install
 2. Follow the account setup instructions and generate your API key from the developer dashboard.
 3. Set the API key in your environment as `PERPLEXITY_API_KEY`.
 
-### Step 3: Configure Claude Desktop
+### Step 3: Domain Filtering (Optional)
+
+You can control the domains that Perplexity searches by using the `search_domain_filter` parameter. The configuration follows this hierarchy:
+
+1.  **User Input**: Provided directly in the tool call.
+2.  **Environment Variable**: If no user input is provided, the server will use the `PERPLEXITY_SEARCH_DOMAIN_FILTER` environment variable.
+3.  **Default**: If neither of the above is set, no domain filter will be applied.
+
+To set the environment variable, you can add it to your shell configuration (e.g., `.zshrc`, `.bashrc`) or a `.env` file:
+
+```bash
+export PERPLEXITY_SEARCH_DOMAIN_FILTER="github.com,docs.pm,wikipedia.org"
+```
+
+### Step 4: Configure Claude Desktop
 
 1. Download Claude desktop [here](https://claude.ai/download). 
 

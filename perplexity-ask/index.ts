@@ -159,6 +159,7 @@ if (!PERPLEXITY_API_KEY) {
   console.error("Error: PERPLEXITY_API_KEY environment variable is required");
   process.exit(1);
 }
+const DOMAIN_FILTER_ENV = process.env.PERPLEXITY_SEARCH_DOMAIN_FILTER;
 
 /**
  * Performs a chat completion by sending a request to the Perplexity API.
@@ -271,6 +272,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (!args) {
       throw new Error("No arguments provided");
     }
+
+    let search_domain_filter = args.search_domain_filter as (string[] | undefined);
+
+    // Hierarchy: user input > environment variable > default
+    if (search_domain_filter === undefined) {
+      if (DOMAIN_FILTER_ENV) {
+        search_domain_filter = DOMAIN_FILTER_ENV.split(',').map(d => d.trim());
+      } else {
+        search_domain_filter = [];
+      }
+    }
+
+    if (search_domain_filter && (!Array.isArray(search_domain_filter) || !search_domain_filter.every(item => typeof item === 'string'))) {
+      throw new Error(`Invalid arguments for ${name}: search_domain_filter must be an array of strings`);
+    }
+
     switch (name) {
       case "perplexity_ask": {
         if (!Array.isArray(args.messages)) {
@@ -280,10 +297,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         const messages = args.messages;
         const model = args.model ?? "sonar-pro";
-        const search_domain_filter = args.search_domain_filter as (string[] | undefined);
-        if (search_domain_filter && (!Array.isArray(search_domain_filter) || !search_domain_filter.every(item => typeof item === 'string'))) {
-          throw new Error('Invalid arguments for perplexity_ask: search_domain_filter must be an array of strings');
-        }
         if (
           typeof model !== "string" ||
           !["sonar", "sonar-pro"].includes(model)
@@ -310,10 +323,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         // Invoke the chat completion function with the provided messages using the deep research model
         const messages = args.messages;
-        const search_domain_filter = args.search_domain_filter as (string[] | undefined);
-        if (search_domain_filter && (!Array.isArray(search_domain_filter) || !search_domain_filter.every(item => typeof item === 'string'))) {
-          throw new Error('Invalid arguments for perplexity_research: search_domain_filter must be an array of strings');
-        }
         const result = await performChatCompletion(
           messages,
           "sonar-deep-research",
@@ -332,10 +341,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         const messages = args.messages;
         const model = args.model ?? "sonar-reasoning-pro";
-        const search_domain_filter = args.search_domain_filter as (string[] | undefined);
-        if (search_domain_filter && (!Array.isArray(search_domain_filter) || !search_domain_filter.every(item => typeof item === 'string'))) {
-          throw new Error('Invalid arguments for perplexity_reason: search_domain_filter must be an array of strings');
-        }
         if (
           typeof model !== "string" ||
           !["sonar-reasoning", "sonar-reasoning-pro"].includes(model)
