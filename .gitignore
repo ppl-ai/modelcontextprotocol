@@ -50,3 +50,6 @@ Desktop.ini
 *.tsv
 *.jsonl
 :
+
+# Ignore build output
+dist/
